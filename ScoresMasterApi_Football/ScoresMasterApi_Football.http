@@ -1,0 +1,6 @@
+@ScoresMasterApi_Football_HostAddress = http://localhost:5145
+
+GET {{ScoresMasterApi_Football_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
