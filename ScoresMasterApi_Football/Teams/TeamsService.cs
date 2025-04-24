@@ -2,14 +2,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ScoresMasterApi_Football.Teams;
 
-public class TeamsService : ITeamsService
+public class TeamsService(ScoresMasterDbContext _context) : ITeamsService
 {
-    private readonly ScoresMasterDbContext _context;
-
-    public TeamsService(ScoresMasterDbContext context)
-    {
-        _context = context;
-    }
 
     public async Task<List<Team>> GetTeams()
     {

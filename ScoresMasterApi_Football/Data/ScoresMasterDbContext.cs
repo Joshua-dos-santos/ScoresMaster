@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ScoresMasterApi_Football.Teams;
+using ScoresMasterApi_Football.Leagues;
 
 public class ScoresMasterDbContext : DbContext
 {
@@ -7,5 +8,5 @@ public class ScoresMasterDbContext : DbContext
         : base(options) { }
 
     public DbSet<Team> Teams { get; set; }
-    // Add more: Matches, Players, Standings, etc.
+    public DbSet<League> Leagues { get; set; }
 }

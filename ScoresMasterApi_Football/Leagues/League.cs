@@ -1,9 +1,9 @@
-namespace ScoresMasterApi_Football.Teams;
+namespace ScoresMasterApi_Football.Leagues;
 
-public class Team
+public class League
 {
     public required int Id { get; set; }
     public required string Name { get; set; }
+    public required string Country { get; set; }
     public string? LogoUrl { get; set; }
-    public required int LeagueId { get; set; }
 }
