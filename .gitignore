@@ -349,8 +349,6 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
-*.nuget.cache
-*nuget.dgspec.json
-*.nuget.g.props
-*.nuget.g.targets
-*assets.json
+# Ignore build output
+bin/
+obj/
