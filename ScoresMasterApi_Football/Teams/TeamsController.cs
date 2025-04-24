@@ -4,14 +4,9 @@ namespace ScoresMasterApi_Football.Teams;
 
 [ApiController]
 [Route("api/[controller]")]
-public class TeamsController : ControllerBase
+public class TeamsController(ITeamsService teamsService) : ControllerBase
 {
-    private readonly ITeamsService _teamsService;
-
-    public TeamsController(ITeamsService teamsService)
-    {
-        _teamsService = teamsService;
-    }
+    private readonly ITeamsService _teamsService = teamsService;
 
     // GET: api/teams
     [HttpGet]
