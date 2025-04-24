@@ -13,7 +13,7 @@ public class TeamsController(ITeamsService teamsService) : ControllerBase
     public async Task<IActionResult> GetTeams()
     {
         var teams = await _teamsService.GetTeams();
-        return Ok(teams);
+        return Ok(teams.Select(TeamDto.FromTeam));
     }
 
     // POST: api/teams

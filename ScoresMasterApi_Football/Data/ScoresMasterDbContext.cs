@@ -9,4 +9,15 @@ public class ScoresMasterDbContext : DbContext
 
     public DbSet<Team> Teams { get; set; }
     public DbSet<League> Leagues { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Team>()
+            .HasOne(t => t.League)
+            .WithMany(l => l.Teams)
+            .HasForeignKey(t => t.LeagueId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
 }

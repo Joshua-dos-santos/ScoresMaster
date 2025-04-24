@@ -7,7 +7,7 @@ public class TeamsService(ScoresMasterDbContext _context) : ITeamsService
 
     public async Task<List<Team>> GetTeams()
     {
-        return await _context.Teams.ToListAsync();
+        return await _context.Teams.Include(t => t.League).ToListAsync();
     }
 
     public async Task<Team> PostTeams(Team team)

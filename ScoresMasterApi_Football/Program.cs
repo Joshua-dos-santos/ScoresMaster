@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ScoresMasterApi_Football.Leagues;
 using ScoresMasterApi_Football.Teams;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<ITeamsService, TeamsService>();
+builder.Services.AddScoped<ILeaguesService, LeaguesService>();
 
 builder.Services.AddDbContext<ScoresMasterDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));

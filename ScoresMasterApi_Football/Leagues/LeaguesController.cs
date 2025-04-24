@@ -12,8 +12,8 @@ public class LeaguesController(ILeaguesService leaguesService) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetLeagues()
     {
-        var teams = await _leaguesService.GetLeagues();
-        return Ok(teams);
+        var leagues = await _leaguesService.GetLeagues();
+        return Ok(leagues.OrderBy(l => l.Id).Select(l => LeagueDto.FromLeague(l)));
     }
 
     // POST: api/teams
