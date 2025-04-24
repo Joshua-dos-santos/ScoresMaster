@@ -1,6 +1,7 @@
-namespace ScoresMasters_FootballApi.Teams;
+namespace ScoresMasterApi_Football.Teams;
 
 public interface ITeamsService
 {
-    string GetTeams();
+    Task<List<Team>> GetTeams();
+    Task<Team> PostTeams(Team team);
 }

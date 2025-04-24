@@ -1,9 +1,25 @@
-namespace ScoresMasters_FootballApi.Teams;
+using Microsoft.EntityFrameworkCore;
+
+namespace ScoresMasterApi_Football.Teams;
 
 public class TeamsService : ITeamsService
 {
-    public string GetTeams()
+    private readonly ScoresMasterDbContext _context;
+
+    public TeamsService(ScoresMasterDbContext context)
     {
-        return "Teams";
+        _context = context;
+    }
+
+    public async Task<List<Team>> GetTeams()
+    {
+        return await _context.Teams.ToListAsync();
+    }
+
+    public async Task<Team> PostTeams(Team team)
+    {
+        _context.Teams.Add(team);
+        await _context.SaveChangesAsync();
+        return team;
     }
 }
