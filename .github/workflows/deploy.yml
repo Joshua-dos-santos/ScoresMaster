@@ -3,7 +3,7 @@ name: Deploy to Heroku
 on:
   push:
     branches:
-      - master  # pas aan naar 'master' als je branch anders heet
+      - master
 
 jobs:
   deploy:
@@ -18,6 +18,7 @@ jobs:
 
     - name: Build and Push Docker image
       run: |
+        cd ScoresMasterApi_Football
         docker build -t registry.heroku.com/scoresmaster-api/web .
         docker push registry.heroku.com/scoresmaster-api/web
 
@@ -26,4 +27,5 @@ jobs:
         HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
       run: |
         curl https://cli-assets.heroku.com/install.sh | sh
+        cd ScoresMasterApi_Football
         heroku container:release web --app scoresmaster-api
