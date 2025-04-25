@@ -11,6 +11,9 @@ if (builder.Environment.IsDevelopment())
     Env.Load();
 }
 
+var testKey = Environment.GetEnvironmentVariable("RAPIDAPI_KEY");
+Console.WriteLine("🔑 RAPIDAPI_KEY op Heroku = " + (testKey ?? "NIET GEVONDEN"));
+
 // Add services to the container.
 
 builder.Services.AddControllers();

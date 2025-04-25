@@ -11,9 +11,6 @@ public class FootballApiService: IFootballApiService
     {
         _httpClient = httpClient;
         _httpClient.BaseAddress = new Uri("https://api-football-v1.p.rapidapi.com/v3/");
-        var apiKey = Environment.GetEnvironmentVariable("RAPIDAPI_KEY");
-        Console.WriteLine($"API key gevonden: {(string.IsNullOrWhiteSpace(apiKey) ? "NIET gevonden" : "✔️ aanwezig")}");
-
         _httpClient.DefaultRequestHeaders.Add("X-RapidAPI-Key", Environment.GetEnvironmentVariable("RAPIDAPI_KEY"));
         _httpClient.DefaultRequestHeaders.Add("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com");
     }
