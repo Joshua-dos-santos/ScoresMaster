@@ -31,4 +31,26 @@ public class FootballApiController(IFootballApiService _footballService, ScoresM
         await _context.SaveChangesAsync();
         return Ok(new { added = teams.Count });
     }
+
+    [HttpPost("import/league/{id}")]
+    public async Task<IActionResult> ImportLeague(int id)
+    {
+        try
+        {
+            var league = await _footballService.FetchLeagueByIdAsync(id);
+
+            var exists = await _context.Leagues.AnyAsync(l => l.Id == league.Id);
+            if (exists) return Conflict("League already exists.");
+
+            _context.Leagues.Add(league);
+            await _context.SaveChangesAsync();
+
+            return Ok(league);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"⚠️ Fout bij importeren van league: {ex.Message}");
+        }
+    }
+
 }

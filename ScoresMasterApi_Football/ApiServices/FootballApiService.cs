@@ -1,4 +1,5 @@
 using System.Text.Json;
+using ScoresMasterApi_Football.Leagues;
 using ScoresMasterApi_Football.Teams;
 
 namespace ScoresMasterApi_Football.ApiServices;
@@ -39,4 +40,33 @@ public class FootballApiService: IFootballApiService
 
         return teams;
     }
+
+    public async Task<League> FetchLeagueByIdAsync(int leagueId)
+{
+    var request = new HttpRequestMessage
+    {
+        Method = HttpMethod.Get,
+        RequestUri = new Uri($"https://api-football-v1.p.rapidapi.com/v3/leagues?id={leagueId}")
+    };
+
+    request.Headers.Add("X-RapidAPI-Key", Environment.GetEnvironmentVariable("RAPIDAPI_KEY"));
+    request.Headers.Add("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com");
+
+    var response = await _httpClient.SendAsync(request);
+    response.EnsureSuccessStatusCode();
+
+    var content = await response.Content.ReadAsStringAsync();
+    var parsed = JsonDocument.Parse(content);
+    var leagueJson = parsed.RootElement.GetProperty("response")[0].GetProperty("league");
+    var country = parsed.RootElement.GetProperty("response")[0].GetProperty("country");
+
+    return new League
+    {
+        Id = leagueJson.GetProperty("id").GetInt32(),
+        Name = leagueJson.GetProperty("name").GetString()!,
+        Country = country.GetProperty("name").GetString()!,
+        LogoUrl = leagueJson.GetProperty("logo").GetString()
+    };
+}
+
 }
