@@ -29,3 +29,11 @@ jobs:
         curl https://cli-assets.heroku.com/install.sh | sh
         cd ScoresMasterApi_Football
         heroku container:release web --app scoresmaster-api
+
+    - name: Run EF Core Migrations
+      run: |
+        cd ScoresMasterApi_Football
+        dotnet tool install --global dotnet-ef
+        dotnet ef database update
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
