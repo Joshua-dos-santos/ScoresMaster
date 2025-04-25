@@ -13,11 +13,5 @@ public class ScoresMasterDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-
-        modelBuilder.Entity<Team>()
-            .HasOne(t => t.League)
-            .WithMany(l => l.Teams)
-            .HasForeignKey(t => t.LeagueId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }

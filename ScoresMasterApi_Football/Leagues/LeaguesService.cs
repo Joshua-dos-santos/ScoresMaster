@@ -8,7 +8,7 @@ public class LeaguesService(ScoresMasterDbContext _context) : ILeaguesService
 
     public async Task<List<League>> GetLeagues()
     {
-        var leagues = await _context.Leagues.Include(l => l.Teams).ToListAsync();
+        var leagues = await _context.Leagues.ToListAsync();
 
         return leagues;
     }

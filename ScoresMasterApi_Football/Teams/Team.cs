@@ -8,5 +8,4 @@ public class Team
     public required string Name { get; set; }
     public string? LogoUrl { get; set; }
     public required int LeagueId { get; set; }
-    public League? League { get; set; }
 }

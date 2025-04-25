@@ -8,7 +8,6 @@ public class LeagueDto
     public required string Name { get; set; }
     public required string Country { get; set; }
     public string? LogoUrl { get; set; }
-    public required List<TeamDto> Teams { get; set; }
 
     public static LeagueDto FromLeague(League league)
     {
@@ -18,17 +17,6 @@ public class LeagueDto
             Name = league.Name,
             Country = league.Country,
             LogoUrl = league.LogoUrl,
-            Teams = league.Teams.OrderBy(t => t.Id).Select(t => new TeamDto
-            {
-                Id = t.Id,
-                Name = t.Name,
-                LogoUrl = t.LogoUrl,
-                League = new LeagueMiniDto
-                {
-                    Id = t.League.Id,
-                    Name = t.League.Name,
-                }
-            }).ToList()
         };
     }
 }

@@ -1,8 +1,15 @@
+using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
+using ScoresMasterApi_Football.ApiServices;
 using ScoresMasterApi_Football.Leagues;
 using ScoresMasterApi_Football.Teams;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsDevelopment())
+{
+    Env.Load();
+}
 
 // Add services to the container.
 
@@ -13,6 +20,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<ITeamsService, TeamsService>();
 builder.Services.AddScoped<ILeaguesService, LeaguesService>();
+builder.Services.AddHttpClient<IFootballApiService, FootballApiService>();
 
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 string connectionString = null;
