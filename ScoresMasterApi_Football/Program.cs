@@ -43,6 +43,9 @@ else
 builder.Services.AddDbContext<ScoresMasterDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+builder.WebHost.UseUrls($"http://+:{port}");
+
 
 var app = builder.Build();
 
