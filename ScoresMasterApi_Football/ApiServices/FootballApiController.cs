@@ -7,7 +7,7 @@ namespace ScoresMasterApi_Football.ApiServices;
 [Route("api/[controller]")]
 public class FootballApiController(IFootballApiService _footballService, ScoresMasterDbContext _context) : ControllerBase
 {
-    [HttpPost("import/eredivisie-teams")]
+    [HttpGet("import/eredivisie-teams")]
     public async Task<IActionResult> ImportEredivisieTeams()
     {
         // Zoek de Eredivisie league in je eigen DB
