@@ -45,4 +45,15 @@ public class LeaguesController(ILeaguesService leaguesService) : ControllerBase
         var updatedLeague = await _leaguesService.PutLeague(id, league);
         return Ok(updatedLeague);
     }
+
+    [HttpDelete("league/{id}")]
+    public async Task<IActionResult> DeleteLeagueWithTeams(int id)
+    {
+        var success = await _leaguesService.DeleteLeagueWithTeamsAsync(id);
+
+        if (!success)
+            return NotFound($"League with ID {id} not found.");
+
+        return Ok(new { message = $"League with ID {id} and its teams have been deleted." });
+    }
 }

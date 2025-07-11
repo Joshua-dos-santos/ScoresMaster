@@ -31,4 +31,18 @@ public class LeaguesService(ScoresMasterDbContext _context) : ILeaguesService
         await _context.SaveChangesAsync();
         return league;
     }
+
+    public async Task<bool> DeleteLeagueWithTeamsAsync(int leagueId)
+    {
+        var league = await _context.Leagues
+            .Include(l => l.Teams)
+            .FirstOrDefaultAsync(l => l.Id == leagueId);
+
+        if (league == null) return false;
+
+        _context.Leagues.Remove(league);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
 }
