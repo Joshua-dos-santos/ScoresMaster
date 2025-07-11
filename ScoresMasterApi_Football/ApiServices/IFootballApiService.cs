@@ -5,6 +5,7 @@ namespace ScoresMasterApi_Football.ApiServices;
 
 public interface IFootballApiService
 {
-    Task<List<Team>> FetchEredivisieTeamsAsync(int localLeagueId);
+    Task<League> FetchLeagueWithTeamsAsync(int leagueId);
+    Task<List<Team>> FetchTeamsByLeagueIdAsync(int leagueId);
     Task<League> FetchLeagueByIdAsync(int leagueId);
 }

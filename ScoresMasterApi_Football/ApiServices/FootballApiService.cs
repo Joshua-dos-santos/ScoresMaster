@@ -16,30 +16,45 @@ public class FootballApiService: IFootballApiService
         _httpClient.DefaultRequestHeaders.Add("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com");
     }
 
-    public async Task<List<Team>> FetchEredivisieTeamsAsync(int localLeagueId)
+    public async Task<League> FetchLeagueWithTeamsAsync(int leagueId)
+{
+    var league = await FetchLeagueByIdAsync(leagueId);
+    var teams = await FetchTeamsByLeagueIdAsync(leagueId);
+
+    foreach (var team in teams)
     {
-        var response = await _httpClient.GetAsync("teams?league=88&season=2024");
-        response.EnsureSuccessStatusCode();
-
-        var json = await response.Content.ReadAsStringAsync();
-
-        var parsed = JsonDocument.Parse(json);
-        var teams = new List<Team>();
-
-        foreach (var t in parsed.RootElement.GetProperty("response").EnumerateArray())
-        {
-            var teamInfo = t.GetProperty("team");
-            teams.Add(new Team
-            {
-                Id = 0, // wordt gegenereerd door DB
-                Name = teamInfo.GetProperty("name").GetString(),
-                LogoUrl = teamInfo.GetProperty("logo").GetString(),
-                LeagueId = localLeagueId
-            });
-        }
-
-        return teams;
+        team.LeagueId = league.Id;
+        team.League = league;
     }
+
+    league.Teams = teams;
+    return league;
+}
+
+public async Task<List<Team>> FetchTeamsByLeagueIdAsync(int leagueId)
+{
+    var response = await _httpClient.GetAsync($"teams?league={leagueId}&season=2024");
+    response.EnsureSuccessStatusCode();
+
+    var json = await response.Content.ReadAsStringAsync();
+    var parsed = JsonDocument.Parse(json);
+
+    var teams = new List<Team>();
+
+    foreach (var t in parsed.RootElement.GetProperty("response").EnumerateArray())
+    {
+        var teamInfo = t.GetProperty("team");
+        teams.Add(new Team
+        {
+            Id = 0,
+            Name = teamInfo.GetProperty("name").GetString()!,
+            LogoUrl = teamInfo.GetProperty("logo").GetString(),
+            LeagueId = leagueId
+        });
+    }
+
+    return teams;
+}
 
     public async Task<League> FetchLeagueByIdAsync(int leagueId)
     {

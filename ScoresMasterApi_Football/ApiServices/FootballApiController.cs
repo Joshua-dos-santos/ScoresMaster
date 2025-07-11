@@ -7,30 +7,40 @@ namespace ScoresMasterApi_Football.ApiServices;
 [Route("api/[controller]")]
 public class FootballApiController(IFootballApiService _footballService, ScoresMasterDbContext _context) : ControllerBase
 {
-    [HttpPost("import/eredivisie-teams")]
-    public async Task<IActionResult> ImportEredivisieTeams()
+    [HttpPost("import/league-with-teams")]
+public async Task<IActionResult> ImportLeagueWithTeams([FromBody] int leagueId)
+{
+    var existingLeague = await _context.Leagues
+        .Include(l => l.Teams)
+        .FirstOrDefaultAsync(l => l.Id == leagueId);
+
+    if (existingLeague != null)
     {
-        // Zoek de Eredivisie league in je eigen DB
-        var eredivisie = await _context.Leagues.FirstOrDefaultAsync(l => l.Name == "Eredivisie");
-
-        if (eredivisie == null)
-            return NotFound("Eredivisie league not found in local database.");
-
-        // Haal teams op van de API
-        var teams = await _footballService.FetchEredivisieTeamsAsync(88);
-
-        // Optioneel: check op dubbele teams
-        foreach (var team in teams)
-        {
-            if (!_context.Teams.Any(t => t.Name == team.Name && t.LeagueId == 88))
-            {
-                _context.Teams.Add(team);
-            }
-        }
-
-        await _context.SaveChangesAsync();
-        return Ok(new { added = teams.Count });
+        return Conflict("League already exists in the database.");
     }
+
+    var league = await _footballService.FetchLeagueWithTeamsAsync(leagueId);
+
+    foreach (var team in league.Teams.ToList())
+    {
+        if (_context.Teams.Any(t => t.Name == team.Name && t.LeagueId == leagueId))
+        {
+            league.Teams.Remove(team);
+        }
+    }
+
+    _context.Leagues.Add(league);
+    await _context.SaveChangesAsync();
+
+    return Ok(new
+    {
+        message = $"League '{league.Name}' and {league.Teams.Count} teams imported successfully.",
+        league.Id,
+        league.Name,
+        league.Country
+    });
+}
+
 
     [HttpPost("import/league/{id}")]
     public async Task<IActionResult> ImportLeague(int id)
