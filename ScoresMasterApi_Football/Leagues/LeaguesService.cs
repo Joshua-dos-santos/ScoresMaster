@@ -19,4 +19,16 @@ public class LeaguesService(ScoresMasterDbContext _context) : ILeaguesService
         await _context.SaveChangesAsync();
         return league;
     }
+
+    public async Task<League> PutLeague(int id, League league)
+    {
+        if (id != league.Id)
+        {
+            throw new ArgumentException("ID mismatch");
+        }
+
+        _context.Entry(league).State = EntityState.Modified;
+        await _context.SaveChangesAsync();
+        return league;
+    }
 }

@@ -28,4 +28,21 @@ public class LeaguesController(ILeaguesService leaguesService) : ControllerBase
         var createdTeam = await _leaguesService.PostLeague(league);
         return CreatedAtAction(nameof(GetLeagues), new { id = createdTeam.Id }, createdTeam);
     }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> PutLeague(int id, [FromBody] League league)
+    {
+        if (id != league.Id)
+        {
+            return BadRequest("ID mismatch");
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var updatedLeague = await _leaguesService.PutLeague(id, league);
+        return Ok(updatedLeague);
+    }
 }
