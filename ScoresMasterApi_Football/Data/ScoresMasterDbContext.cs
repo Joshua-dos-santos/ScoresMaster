@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ScoresMasterApi_Football.Teams;
 using ScoresMasterApi_Football.Leagues;
 using ScoresMasterApi_Football.Matches;
+using ScoresMasterApi_Football.Players;
 
 public class ScoresMasterDbContext : DbContext
 {
@@ -11,6 +12,7 @@ public class ScoresMasterDbContext : DbContext
     public DbSet<Team> Teams { get; set; }
     public DbSet<League> Leagues { get; set; }
     public DbSet<Match> Matches { get; set; }
+    public DbSet<Player> Players { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,5 +41,11 @@ public class ScoresMasterDbContext : DbContext
             .WithMany()
             .HasForeignKey(m => m.AwayTeamId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Player>()
+            .HasOne(p => p.Team)
+            .WithMany(t => t.Players)
+            .HasForeignKey(p => p.TeamId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

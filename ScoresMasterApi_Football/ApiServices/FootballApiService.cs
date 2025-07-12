@@ -1,6 +1,7 @@
 using System.Text.Json;
 using ScoresMasterApi_Football.Leagues;
 using ScoresMasterApi_Football.Matches;
+using ScoresMasterApi_Football.Players;
 using ScoresMasterApi_Football.Teams;
 
 namespace ScoresMasterApi_Football.ApiServices;
@@ -54,17 +55,30 @@ public class FootballApiService : IFootballApiService
         foreach (var t in parsed.RootElement.GetProperty("response").EnumerateArray())
         {
             var teamInfo = t.GetProperty("team");
-            teams.Add(new Team
+            var teamId = teamInfo.GetProperty("id").GetInt32();
+
+            var team = new Team
             {
                 Id = 0,
                 Name = teamInfo.GetProperty("name").GetString()!,
                 LogoUrl = teamInfo.GetProperty("logo").GetString(),
                 LeagueId = leagueId
-            });
+            };
+
+            var players = await FetchPlayersByTeamIdAsync(teamId);
+            foreach (var player in players)
+            {
+                player.Team = team;
+            }
+
+            team.Players = players;
+
+            teams.Add(team);
         }
 
         return teams;
     }
+
 
     public async Task<League> FetchLeagueByIdAsync(int leagueId)
     {
@@ -128,4 +142,31 @@ public class FootballApiService : IFootballApiService
         return matches;
     }
 
+    public async Task<List<Player>> FetchPlayersByTeamIdAsync(int teamId)
+    {
+        var response = await _httpClient.GetAsync($"players?team={teamId}&season=2025");
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        var parsed = JsonDocument.Parse(json);
+
+        var players = new List<Player>();
+
+        foreach (var item in parsed.RootElement.GetProperty("response").EnumerateArray())
+        {
+            var playerJson = item.GetProperty("player");
+
+            players.Add(new Player
+            {
+                Id = 0,
+                Name = playerJson.GetProperty("name").GetString()!,
+                Age = playerJson.GetProperty("age").GetInt32(),
+                Nationality = playerJson.GetProperty("nationality").GetString()!,
+                Position = playerJson.GetProperty("position").GetString()!,
+                TeamId = teamId
+            });
+        }
+
+        return players;
+    }
 }
