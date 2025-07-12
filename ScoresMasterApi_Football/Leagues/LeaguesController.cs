@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ScoresMasterApi_Football.Teams;
 
 namespace ScoresMasterApi_Football.Leagues;
 
@@ -27,7 +28,7 @@ public class LeaguesController(ILeaguesService leaguesService) : ControllerBase
     }
 
     [HttpGet("{id}/teams")]
-    public async Task<IActionResult> GetLeagueWithTeams(int leagueId)
+    public async Task<IActionResult> GetTeamsByLeague(int leagueId)
     {
         if (leagueId <= 0)
         {
@@ -35,7 +36,7 @@ public class LeaguesController(ILeaguesService leaguesService) : ControllerBase
         }
 
         var teams = await _leaguesService.GetTeamsByLeagueId(leagueId);
-        return Ok(teams);
+        return Ok(TeamsDto.FromTeamsCollection(teams));
     }
 
     [HttpPost]

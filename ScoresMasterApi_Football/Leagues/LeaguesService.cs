@@ -22,7 +22,7 @@ public class LeaguesService(ScoresMasterDbContext _context) : ILeaguesService
         return league ?? throw new KeyNotFoundException($"League with ID {id} not found.");
     }
 
-    public async Task<List<Team>> GetTeamsByLeagueId(int leagueId)
+    public async Task<TeamsCollection> GetTeamsByLeagueId(int leagueId)
     {
         var league = await _context.Leagues
             .Include(l => l.Teams)
@@ -33,7 +33,12 @@ public class LeaguesService(ScoresMasterDbContext _context) : ILeaguesService
             throw new KeyNotFoundException($"League with ID {leagueId} not found.");
         }
 
-        return league.Teams.ToList();
+        var teams = new TeamsCollection
+        {
+            TeamsList = league.Teams.OrderBy(t => t.Id).ToList()
+        };
+
+        return teams;
     }
 
     public async Task<League> PostLeague(League league)
