@@ -8,7 +8,6 @@ public class LeaguesController(ILeaguesService leaguesService) : ControllerBase
 {
     private readonly ILeaguesService _leaguesService = leaguesService;
 
-    // GET: api/teams
     [HttpGet]
     public async Task<IActionResult> GetLeagues()
     {
@@ -16,7 +15,29 @@ public class LeaguesController(ILeaguesService leaguesService) : ControllerBase
         return Ok(leagues.OrderBy(l => l.Id).Select(l => LeagueDto.FromLeague(l)));
     }
 
-    // POST: api/teams
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetLeagueById(int id)
+    {
+        if (id <= 0)
+        {
+            return BadRequest("Invalid league ID.");
+        }
+        var league = await _leaguesService.GetLeagueById(id);
+        return Ok(LeagueDto.FromLeague(league));
+    }
+
+    [HttpGet("{id}/teams")]
+    public async Task<IActionResult> GetLeagueWithTeams(int leagueId)
+    {
+        if (leagueId <= 0)
+        {
+            return BadRequest("Invalid league ID.");
+        }
+
+        var teams = await _leaguesService.GetTeamsByLeagueId(leagueId);
+        return Ok(teams);
+    }
+
     [HttpPost]
     public async Task<IActionResult> PostLeague([FromBody] League league)
     {
@@ -46,7 +67,7 @@ public class LeaguesController(ILeaguesService leaguesService) : ControllerBase
         return Ok(updatedLeague);
     }
 
-    [HttpDelete("league/{id}")]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteLeagueWithTeams(int id)
     {
         var success = await _leaguesService.DeleteLeagueWithTeamsAsync(id);
