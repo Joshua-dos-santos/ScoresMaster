@@ -8,38 +8,38 @@ namespace ScoresMasterApi_Football.ApiServices;
 public class FootballApiController(IFootballApiService _footballService, ScoresMasterDbContext _context) : ControllerBase
 {
     [HttpPost("import/league-with-teams")]
-public async Task<IActionResult> ImportLeagueWithTeams([FromBody] int leagueId)
-{
-    var existingLeague = await _context.Leagues
-        .Include(l => l.Teams)
-        .FirstOrDefaultAsync(l => l.Id == leagueId);
-
-    if (existingLeague != null)
+    public async Task<IActionResult> ImportLeagueWithTeams([FromBody] int leagueId)
     {
-        return Conflict("League already exists in the database.");
-    }
+        var existingLeague = await _context.Leagues
+            .Include(l => l.Teams)
+            .FirstOrDefaultAsync(l => l.Id == leagueId);
 
-    var league = await _footballService.FetchLeagueWithTeamsAsync(leagueId);
-
-    foreach (var team in league.Teams.ToList())
-    {
-        if (_context.Teams.Any(t => t.Name == team.Name && t.LeagueId == leagueId))
+        if (existingLeague != null)
         {
-            league.Teams.Remove(team);
+            return Conflict("League already exists in the database.");
         }
+
+        var league = await _footballService.FetchLeagueWithTeamsAsync(leagueId);
+
+        foreach (var team in league.Teams.ToList())
+        {
+            if (_context.Teams.Any(t => t.Name == team.Name && t.LeagueId == leagueId))
+            {
+                league.Teams.Remove(team);
+            }
+        }
+
+        _context.Leagues.Add(league);
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            message = $"League '{league.Name}' and {league.Teams.Count} teams imported successfully.",
+            league.Id,
+            league.Name,
+            league.Country
+        });
     }
-
-    _context.Leagues.Add(league);
-    await _context.SaveChangesAsync();
-
-    return Ok(new
-    {
-        message = $"League '{league.Name}' and {league.Teams.Count} teams imported successfully.",
-        league.Id,
-        league.Name,
-        league.Country
-    });
-}
 
 
     [HttpPost("import/league/{id}")]

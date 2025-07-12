@@ -1,10 +1,11 @@
 using System.Text.Json;
 using ScoresMasterApi_Football.Leagues;
+using ScoresMasterApi_Football.Matches;
 using ScoresMasterApi_Football.Teams;
 
 namespace ScoresMasterApi_Football.ApiServices;
 
-public class FootballApiService: IFootballApiService
+public class FootballApiService : IFootballApiService
 {
     private readonly HttpClient _httpClient;
 
@@ -17,44 +18,53 @@ public class FootballApiService: IFootballApiService
     }
 
     public async Task<League> FetchLeagueWithTeamsAsync(int leagueId)
-{
-    var league = await FetchLeagueByIdAsync(leagueId);
-    var teams = await FetchTeamsByLeagueIdAsync(leagueId);
-
-    foreach (var team in teams)
     {
-        team.LeagueId = league.Id;
-        team.League = league;
-    }
+        var league = await FetchLeagueByIdAsync(leagueId);
+        var teams = await FetchTeamsByLeagueIdAsync(leagueId);
+        var matches = await FetchMatchesByLeagueIdAsync(leagueId);
 
-    league.Teams = teams;
-    return league;
-}
-
-public async Task<List<Team>> FetchTeamsByLeagueIdAsync(int leagueId)
-{
-    var response = await _httpClient.GetAsync($"teams?league={leagueId}&season=2024");
-    response.EnsureSuccessStatusCode();
-
-    var json = await response.Content.ReadAsStringAsync();
-    var parsed = JsonDocument.Parse(json);
-
-    var teams = new List<Team>();
-
-    foreach (var t in parsed.RootElement.GetProperty("response").EnumerateArray())
-    {
-        var teamInfo = t.GetProperty("team");
-        teams.Add(new Team
+        foreach (var team in teams)
         {
-            Id = 0,
-            Name = teamInfo.GetProperty("name").GetString()!,
-            LogoUrl = teamInfo.GetProperty("logo").GetString(),
-            LeagueId = leagueId
-        });
+            team.LeagueId = league.Id;
+            team.League = league;
+        }
+
+        foreach (var match in matches)
+        {
+            match.League = league;
+        }
+
+        league.Teams = teams;
+        league.Matches = matches;
+
+        return league;
     }
 
-    return teams;
-}
+
+    public async Task<List<Team>> FetchTeamsByLeagueIdAsync(int leagueId)
+    {
+        var response = await _httpClient.GetAsync($"teams?league={leagueId}&season=2025");
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        var parsed = JsonDocument.Parse(json);
+
+        var teams = new List<Team>();
+
+        foreach (var t in parsed.RootElement.GetProperty("response").EnumerateArray())
+        {
+            var teamInfo = t.GetProperty("team");
+            teams.Add(new Team
+            {
+                Id = 0,
+                Name = teamInfo.GetProperty("name").GetString()!,
+                LogoUrl = teamInfo.GetProperty("logo").GetString(),
+                LeagueId = leagueId
+            });
+        }
+
+        return teams;
+    }
 
     public async Task<League> FetchLeagueByIdAsync(int leagueId)
     {
@@ -83,4 +93,39 @@ public async Task<List<Team>> FetchTeamsByLeagueIdAsync(int leagueId)
             LogoUrl = leagueJson.GetProperty("logo").GetString()
         };
     }
+
+    public async Task<List<Match>> FetchMatchesByLeagueIdAsync(int leagueId)
+    {
+        var response = await _httpClient.GetAsync($"fixtures?league={leagueId}&season=2025");
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        var parsed = JsonDocument.Parse(json);
+
+        var matches = new List<Match>();
+
+        foreach (var item in parsed.RootElement.GetProperty("response").EnumerateArray())
+        {
+            var fixture = item.GetProperty("fixture");
+            var teams = item.GetProperty("teams");
+            var goals = item.GetProperty("goals");
+
+            matches.Add(new Match
+            {
+                Id = 0,
+                LeagueId = leagueId,
+                Date = fixture.GetProperty("date").GetDateTime(),
+
+                HomeTeamId = teams.GetProperty("home").GetProperty("id").GetInt32(),
+                AwayTeamId = teams.GetProperty("away").GetProperty("id").GetInt32(),
+
+                HomeScore = goals.GetProperty("home").ValueKind == JsonValueKind.Null ? null : goals.GetProperty("home").GetInt32(),
+                AwayScore = goals.GetProperty("away").ValueKind == JsonValueKind.Null ? null : goals.GetProperty("away").GetInt32(),
+                Status = item.GetProperty("fixture").GetProperty("status").GetProperty("short").GetString()
+            });
+        }
+
+        return matches;
+    }
+
 }
