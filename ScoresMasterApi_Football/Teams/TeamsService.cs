@@ -10,10 +10,11 @@ public class TeamsService(ScoresMasterDbContext _context) : ITeamsService
         return await _context.Teams.ToListAsync();
     }
 
-    public async Task<Team> PostTeams(Team team)
+    public async Task<Team> GetTeamById(int id)
     {
-        _context.Teams.Add(team);
-        await _context.SaveChangesAsync();
-        return team;
+        var team = await _context.Teams
+            .Include(t => t.Players)
+            .FirstOrDefaultAsync(t => t.Id == id);
+        return team ?? throw new KeyNotFoundException($"Team with ID {id} not found.");
     }
 }

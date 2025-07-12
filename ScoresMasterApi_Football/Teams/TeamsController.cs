@@ -8,7 +8,6 @@ public class TeamsController(ITeamsService teamsService) : ControllerBase
 {
     private readonly ITeamsService _teamsService = teamsService;
 
-    // GET: api/teams
     [HttpGet]
     public async Task<IActionResult> GetTeams()
     {
@@ -16,16 +15,14 @@ public class TeamsController(ITeamsService teamsService) : ControllerBase
         return Ok(teams.Select(TeamDto.FromTeam));
     }
 
-    // POST: api/teams
-    [HttpPost]
-    public async Task<IActionResult> PostTeam([FromBody] Team team)
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetTeamById(int id)
     {
-        if (!ModelState.IsValid)
+        if (id <= 0)
         {
-            return BadRequest(ModelState);
+            return BadRequest("Invalid team ID.");
         }
-
-        var createdTeam = await _teamsService.PostTeams(team);
-        return CreatedAtAction(nameof(GetTeams), new { id = createdTeam.Id }, createdTeam);
+        var team = await _teamsService.GetTeamById(id);
+        return Ok(TeamDto.FromTeam(team));
     }
 }
