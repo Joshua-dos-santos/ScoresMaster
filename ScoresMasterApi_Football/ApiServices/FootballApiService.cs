@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using ScoresMasterApi_Football.Leagues;
 using ScoresMasterApi_Football.Matches;
 using ScoresMasterApi_Football.Players;
@@ -9,10 +10,13 @@ namespace ScoresMasterApi_Football.ApiServices;
 public class FootballApiService : IFootballApiService
 {
     private readonly HttpClient _httpClient;
+    private readonly ScoresMasterDbContext _context;
 
-    public FootballApiService(HttpClient httpClient, IConfiguration config)
+    public FootballApiService(HttpClient httpClient, IConfiguration config, ScoresMasterDbContext context)
     {
         _httpClient = httpClient;
+        _context = context;
+
         _httpClient.BaseAddress = new Uri("https://api-football-v1.p.rapidapi.com/v3/");
         _httpClient.DefaultRequestHeaders.Add("X-RapidAPI-Key", Environment.GetEnvironmentVariable("RAPIDAPI_KEY"));
         _httpClient.DefaultRequestHeaders.Add("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com");
@@ -41,10 +45,9 @@ public class FootballApiService : IFootballApiService
         return league;
     }
 
-
     public async Task<List<Team>> FetchTeamsByLeagueIdAsync(int leagueId)
     {
-        var response = await _httpClient.GetAsync($"teams?league={leagueId}&season=2025");
+        var response = await _httpClient.GetAsync($"teams?league={leagueId}&season=2024");
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
@@ -59,7 +62,7 @@ public class FootballApiService : IFootballApiService
 
             var team = new Team
             {
-                Id = 0,
+                Id = teamId,
                 Name = teamInfo.GetProperty("name").GetString()!,
                 LogoUrl = teamInfo.GetProperty("logo").GetString(),
                 LeagueId = leagueId
@@ -72,13 +75,11 @@ public class FootballApiService : IFootballApiService
             }
 
             team.Players = players;
-
             teams.Add(team);
         }
 
         return teams;
     }
-
 
     public async Task<League> FetchLeagueByIdAsync(int leagueId)
     {
@@ -110,7 +111,7 @@ public class FootballApiService : IFootballApiService
 
     public async Task<List<Match>> FetchMatchesByLeagueIdAsync(int leagueId)
     {
-        var response = await _httpClient.GetAsync($"fixtures?league={leagueId}&season=2025");
+        var response = await _httpClient.GetAsync($"fixtures?league={leagueId}&season=2024");
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
@@ -135,7 +136,7 @@ public class FootballApiService : IFootballApiService
 
                 HomeScore = goals.GetProperty("home").ValueKind == JsonValueKind.Null ? null : goals.GetProperty("home").GetInt32(),
                 AwayScore = goals.GetProperty("away").ValueKind == JsonValueKind.Null ? null : goals.GetProperty("away").GetInt32(),
-                Status = item.GetProperty("fixture").GetProperty("status").GetProperty("short").GetString()
+                Status = fixture.GetProperty("status").GetProperty("short").GetString()
             });
         }
 
@@ -144,7 +145,7 @@ public class FootballApiService : IFootballApiService
 
     public async Task<List<Player>> FetchPlayersByTeamIdAsync(int teamId)
     {
-        var response = await _httpClient.GetAsync($"players?team={teamId}&season=2025");
+        var response = await _httpClient.GetAsync($"players?team={teamId}&season=2024");
         response.EnsureSuccessStatusCode();
 
         var json = await response.Content.ReadAsStringAsync();
@@ -155,14 +156,20 @@ public class FootballApiService : IFootballApiService
         foreach (var item in parsed.RootElement.GetProperty("response").EnumerateArray())
         {
             var playerJson = item.GetProperty("player");
+            var statisticsJson = item.GetProperty("statistics")[0];
+
+            var name = playerJson.GetProperty("name").GetString()!;
+            var age = playerJson.GetProperty("age").GetInt32();
+            var position = statisticsJson.GetProperty("games").GetProperty("position").GetString()!;
+            var nationality = playerJson.GetProperty("nationality").GetString() ?? "Unknown";
 
             players.Add(new Player
             {
                 Id = 0,
-                Name = playerJson.GetProperty("name").GetString()!,
-                Age = playerJson.GetProperty("age").GetInt32(),
-                Nationality = playerJson.GetProperty("nationality").GetString()!,
-                Position = playerJson.GetProperty("position").GetString()!,
+                Name = name,
+                Age = age,
+                Position = position,
+                Nationality = nationality,
                 TeamId = teamId
             });
         }

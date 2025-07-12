@@ -29,6 +29,11 @@ public class FootballApiController(IFootballApiService _footballService, ScoresM
             }
         }
 
+        var teamIds = league.Teams.Select(t => t.Id).ToHashSet();
+        league.Matches = league.Matches
+            .Where(m => teamIds.Contains(m.HomeTeamId) && teamIds.Contains(m.AwayTeamId))
+            .ToList();
+
         _context.Leagues.Add(league);
         await _context.SaveChangesAsync();
 
